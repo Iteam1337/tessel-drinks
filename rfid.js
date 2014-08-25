@@ -2,14 +2,14 @@
 
 var tessel = require('tessel');
 var rfidlib = require('rfid-pn532');
-var camera = require('camera-vc0706').use(tessel.port['B']);
-var led = tessel.led[3]; // Set up an LED to notify when we're taking a picture
-var ready = tessel.led[0]; // Set up an LED to notify when we're taking a picture
-var twitterPost = require('./twitter');
+var camera = require('camera-vc0706').use(tessel.port.B);
+var shutter = tessel.led[3]; // Set up an LED to notify when we're taking a picture
+var ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
+var send = require('./twitter');
 
-var rfid = rfidlib.use(tessel.port['A']);
+var rfid = rfidlib.use(tessel.port.A);
 
-rfid.on('ready', function(version) {
+rfid.on('ready', function() {
   console.log('Ready to read RFID card');
 
   var busy = false;
@@ -17,15 +17,15 @@ rfid.on('ready', function(version) {
   rfid.on('data', function(card) {
     console.log('UID:', card.uid.toString('hex'));
 
-    if (!busy) takePicture(function() {
+    if (!busy) snapAndSend(function() {
       busy = false;
     }, busy = true);
   });
 });
 
 
-function takePicture(done) {
-  led.high();
+function snapAndSend(done) {
+  shutter.high();
 
   ready.toggle();
 
@@ -33,20 +33,20 @@ function takePicture(done) {
 
     if (err) {
       console.log('error taking image', err);
+      return done(err);
     } else {
-      led.low();
+      shutter.low();
       // Save the image
       console.log('Sending image to twitter');
 
-      twitterPost('A #drinkcoin was issued by @iteam1337 at @NordicJs to ', image, function(err){
+      send('A #drinkcoin was issued by @iteam1337 at @NordicJs to ', image, function(err){
         if (err) ready.toggle(); // toggle twice
         ready.toggle();
 
         console.log('done.', err);
-        done(err);
+        return done(err);
 
       });
-
     }
   });
 }
