@@ -9,10 +9,10 @@ var bound = require('crypto').pseudoRandomBytes(16).toString('hex');
 var ctype = 'multipart/form-data; boundary=' + bound;
 
 // Tweeting as @TesselTweet
-var oauth_consumer_key = "O7oc0pvsZn4xjgcuHuYdX4FaC";
-var oauth_consumer_secret = "iJYuHFz2sD46Nvk3mcwzX8uih14aEAMgVWdWoR59nx8v6Zl7ZX";
-var oauth_access_token = "2529232909-luARGU89K4CKFMvfzBjCgG6ubefzDkdDWkSB85i";
-var oauth_access_secret = "GXQfuzvGdjLEs3t1HEYfhQ9x9bdBcSBVXjBkbRgwYlOE0";
+var oauth_consumer_key = "Zic5Yqw9puVf1ERbbWpFKtkoV";
+var oauth_consumer_secret = "3aBBcxbnFhWolv3z6soIczyXpGxuquahml1kMOMV3tiG6zB5jc";
+var oauth_access_token = "304297221-tpMIuRdFWbzpUdfRmlzAlGn6YVeNhrzYX0e7KWVE";
+var oauth_access_secret = "uKydZis5fAEr2Mug4dLGV2SzpGIICTZZJPWHTlH7u9fa0";
  
 // Get time
 var curtime = parseInt(process.env.DEPLOY_TIMESTAMP || Date.now());
@@ -42,9 +42,9 @@ oauth_data.oauth_signature = crypto
 var auth_header = 'OAuth ' + Object.keys(oauth_data).sort().map(function (key) {
     return key + '="' + encodeURIComponent(oauth_data[key]) + '"';
 }).join(', ');
- 
 
-function post(status, file) {
+
+function post(status, file, done) {
   var req = https.request({
     port: 443,
     method: 'POST',
@@ -61,6 +61,12 @@ function post(status, file) {
   }, function(res) {
       console.log('statusCode: ', res.statusCode);
       console.log('headers: ', res.headers);
+
+      if (200 === res.statusCode){
+        return done && done();
+      } else {
+        return done && done(res.statusCode);
+      }
 
       res.on('data', function(d) {
         console.log(' ');

@@ -4,16 +4,8 @@ var tessel = require('tessel');
 var rfidlib = require('rfid-pn532');
 var camera = require('camera-vc0706').use(tessel.port['B']);
 var led = tessel.led[3]; // Set up an LED to notify when we're taking a picture
-var servolib = require('servo-pca9685');
+var ready = tessel.led[0]; // Set up an LED to notify when we're taking a picture
 var twitterPost = require('./twitter');
-
-var servo = servolib.use(tessel.port['C']);
-
-servo.on('ready', function() {
-  servo.configure(1, 0.05, 0.12, function() {
-    servo.move(1, 0);
-  });
-});
 
 var rfid = rfidlib.use(tessel.port['A']);
 
@@ -35,7 +27,7 @@ rfid.on('ready', function(version) {
 function takePicture(done) {
   led.high();
 
-  servo.move(1, 1);
+  ready.toggle();
 
   camera.takePicture(function(err, image) {
 
@@ -46,11 +38,15 @@ function takePicture(done) {
       // Save the image
       console.log('Sending image to twitter');
 
-      twitterPost('Testing #tessel with rfid', image);
+      twitterPost('A #drinkcoin was issued by @iteam1337 at @NordicJs to ', image, function(err){
+        if (err) ready.toggle(); // toggle twice
+        ready.toggle();
 
-      process.sendfile(name, image);
-      servo.move(1, 0);
-      console.log('done.');
+        console.log('done.', err);
+        done(err);
+
+      });
+
     }
   });
 }
