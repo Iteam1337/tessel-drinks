@@ -9,38 +9,40 @@ var bound = require('crypto').pseudoRandomBytes(16).toString('hex');
 var ctype = 'multipart/form-data; boundary=' + bound;
 
 // Tweeting as @TesselTweet
-var oauth_consumer_key = 'Zic5Yqw9puVf1ERbbWpFKtkoV';
-var oauth_consumer_secret = '3aBBcxbnFhWolv3z6soIczyXpGxuquahml1kMOMV3tiG6zB5jc';
-var oauth_access_token = '304297221-tpMIuRdFWbzpUdfRmlzAlGn6YVeNhrzYX0e7KWVE';
-var oauth_access_secret = 'uKydZis5fAEr2Mug4dLGV2SzpGIICTZZJPWHTlH7u9fa0';
-
+var oauth_consumer_key = "O7oc0pvsZn4xjgcuHuYdX4FaC";
+var oauth_consumer_secret = "iJYuHFz2sD46Nvk3mcwzX8uih14aEAMgVWdWoR59nx8v6Zl7ZX";
+var oauth_access_token = "2529232909-luARGU89K4CKFMvfzBjCgG6ubefzDkdDWkSB85i";
+var oauth_access_secret = "GXQfuzvGdjLEs3t1HEYfhQ9x9bdBcSBVXjBkbRgwYlOE0";
+ 
 // Get time
 var curtime = parseInt(process.env.DEPLOY_TIMESTAMP || Date.now());
 
 // Set up OAuth
 var oauth_data = {
-  oauth_consumer_key: oauth_consumer_key,
-  oauth_nonce: require('crypto').pseudoRandomBytes(32).toString('hex'),
-  oauth_signature_method: 'HMAC-SHA1',
-  oauth_timestamp: Math.floor(curtime / 1000),
-  oauth_token: oauth_access_token,
-  oauth_version: '1.0'
+    oauth_consumer_key: oauth_consumer_key,
+    oauth_nonce: require('crypto').pseudoRandomBytes(32).toString('hex'),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(curtime / 1000),
+    oauth_token: oauth_access_token,
+    oauth_version: '1.0'
 };
-
+ 
 var out = [].concat(
-    ['POST', 'https://api.twitter.com/1.1/statuses/update_with_media.json'], (Object.keys(oauth_data).sort().map(function(k) {
-    return encodeURIComponent(k) + '=' + encodeURIComponent(oauth_data[k]);
-  }).join('&amp;'))
-).map(encodeURIComponent).join('&amp;');
-
+    ['POST', 'https://api.twitter.com/1.1/statuses/update_with_media.json'],
+    (Object.keys(oauth_data).sort().map(function (k) {
+        return encodeURIComponent(k) + '=' + encodeURIComponent(oauth_data[k]);
+    }).join('&'))
+).map(encodeURIComponent).join('&');
+ 
 oauth_data.oauth_signature = crypto
-  .createHmac('sha1', [oauth_consumer_secret, oauth_access_secret].join('&amp;'))
+  .createHmac('sha1', [oauth_consumer_secret, oauth_access_secret].join('&'))
   .update(out)
   .digest('base64');
-
-var auth_header = 'OAuth ' + Object.keys(oauth_data).sort().map(function(key) {
-  return key + '="' + encodeURIComponent(oauth_data[key]) + '"';
+ 
+var auth_header = 'OAuth ' + Object.keys(oauth_data).sort().map(function (key) {
+    return key + '="' + encodeURIComponent(oauth_data[key]) + '"';
 }).join(', ');
+ 
 
 function post(status, file) {
   var req = https.request({
