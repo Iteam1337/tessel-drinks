@@ -9,6 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tessel": "^0.3.11"
+    "tessel": "^0.3.11",
+    "camera-vc0706": "*",
+    "rfid-pn532": "*",
+    "servo-pca9685": "*"
   }
 }

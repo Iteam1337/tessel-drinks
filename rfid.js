@@ -63,8 +63,6 @@ function takePicture() {
       process.sendfile(name, image);
       servo.move(1, 0);
       console.log('done.');
-      // Turn the camera off to end the script
-      camera.disable();
     }
   });
 }
