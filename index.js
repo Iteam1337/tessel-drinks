@@ -9,8 +9,8 @@ var camera = cameralib.use(tessel.port.B),
   shutter = tessel.led[3], // Set up an LED to notify when we're taking a picture
   ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
 
-var send = require('./twitter'),
-  servo = require('./servo');
+var send = require('./lib/twitter'),
+  servo = require('./lib/servo');
 
 rfid.on('ready', function() {
   console.log('Ready to read RFID card');
