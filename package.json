@@ -36,6 +36,7 @@
     "camera-vc0706": true,
     "rfid-pn532": true,
     "servo-pca9685": true,
-    "tessel": true
+    "tessel": true,
+    "q": true
   }
 }

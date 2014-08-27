@@ -1,10 +1,9 @@
 'use strict';
 
 var tessel = require('tessel'),
-  rfidlib = require('rfid-pn532'),
-  cameralib = require('camera-vc0706');
+  rfidlib = require('rfid-pn532');
 
-var camera = cameralib.use(tessel.port.B),
+var camera = require('./lib/camera')(tessel.port.B),
   rfid = rfidlib.use(tessel.port.D),
   shutter = tessel.led[3], // Set up an LED to notify when we're taking a picture
   ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
@@ -34,12 +33,9 @@ function snapAndSend(done) {
 
   servo.move(1, 1);
 
-  camera.takePicture(function(err, image) {
-
-    if (err) {
-      console.log('error taking image', err);
-      return done(err);
-    } else {
+  camera
+    .takePicture()
+    .then(function(image) {
       shutter.low();
       // Save the image
       console.log('Sending image to twitter');
@@ -50,15 +46,14 @@ function snapAndSend(done) {
 
         console.log('done.', err);
         return done(err);
-
       });
-    }
-
-    servo.move(1, 0);
-    setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
-  });
+    })
+    .catch(function (err) {
+      console.log('error taking image', err);
+      return done(err);
+    })
+    .done(function () {
+      servo.move(1, 0);
+      setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
+    });
 }
-
-camera.on('error', function(err) {
-  console.error(err);
-});
