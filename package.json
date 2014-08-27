@@ -26,5 +26,15 @@
     "sinon": "^1.10.3",
     "sinon-chai": "^2.5.0",
     "sinon-promise": "0.0.2"
+  },
+  "hardware": {
+    "./": false,
+    "*": false,
+    "./index.js": true,
+    "./lib/**/*": true,
+    "camera-vc0706": true,
+    "rfid-pn532": true,
+    "servo-pca9685": true,
+    "tessel": true
   }
 }
