@@ -1,13 +1,16 @@
 'use strict';
 
-var tessel = require('tessel');
-var rfidlib = require('rfid-pn532');
-var camera = require('camera-vc0706').use(tessel.port.B);
-var shutter = tessel.led[3]; // Set up an LED to notify when we're taking a picture
-var ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
-var send = require('./twitter');
+var tessel = require('tessel'),
+  rfidlib = require('rfid-pn532'),
+  cameralib = require('camera-vc0706');
 
-var rfid = rfidlib.use(tessel.port.A);
+var camera = cameralib.use(tessel.port.B),
+  rfid = rfidlib.use(tessel.port.D),
+  shutter = tessel.led[3], // Set up an LED to notify when we're taking a picture
+  ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
+
+var send = require('./twitter'),
+  servo = require('./servo');
 
 rfid.on('ready', function() {
   console.log('Ready to read RFID card');
@@ -29,6 +32,8 @@ function snapAndSend(done) {
 
   ready.toggle();
 
+  servo.move(1, 1);
+
   camera.takePicture(function(err, image) {
 
     if (err) {
@@ -48,6 +53,9 @@ function snapAndSend(done) {
 
       });
     }
+
+    servo.move(1, 0);
+    setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
   });
 }
 
