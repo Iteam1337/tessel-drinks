@@ -6,6 +6,7 @@ var tessel = require('tessel'),
 var wifi = require('wifi-cc3000');
 var network = "Miss Clara";
 var password = "clara2014";
+var drinkCoinHasher = require('./drinkCoinHasher');
 
 function tryConnect() {
   if (!wifi.isBusy()){
@@ -71,9 +72,14 @@ rfid.on('ready', function() {
     
     console.log('UID:', card.uid.readInt32LE(0));
 
-    if (!busy) snapAndSend('dc' + card.uid.readInt32LE(0), function() {
-      busy = false;
-    }, busy = true);
+    if (!busy) {
+      drinkCoinHasher.hashDrinkCoinId(card.uid.readInt32LE(0), function(hashedId) {
+        snapAndSend('dc' + hashedId, function() {
+          busy = false;
+        }, busy = true);
+      });
+      
+    }
   });
 });
 
