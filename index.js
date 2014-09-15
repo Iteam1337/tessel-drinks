@@ -109,8 +109,6 @@ function snapAndSend(cardId, done) {
       shutter.low();
       // Save the image
       console.log('Sending image to twitter', cardId);
-      //ready.toggle();
-      //done(null);
       send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
         if (err) ready.toggle(); // toggle twice
         ready.toggle();
