@@ -1,12 +1,22 @@
 'use strict';
 
-var tessel = require('tessel'),
-  rfidlib = require('rfid-pn532');
+var tessel = require('tessel');
+var rfidlib = require('rfid-pn532');
+var crypto = require('crypto');
 
 var wifi = require('wifi-cc3000');
-var network = "Miss Clara";
-var password = "clara2014";
-var drinkCoinHasher = require('./drinkCoinHasher');
+var network = "IteamGuest";
+var password = "penthouse";
+
+function hashDrinkCoinId(id, cb) {
+  var hashedId = '';
+  var salt = 'i1t3e3a7m'
+  var md5 = crypto.createHash('md5');
+  md5.update(salt + id + salt, 'utf8');
+  hashedId = md5.digest('hex');
+  console.log('Hashed UID:', hashedId);
+  cb(hashedId);
+}
 
 function tryConnect() {
   if (!wifi.isBusy()){
@@ -51,11 +61,12 @@ wifi.on('error', function(err){
   // 2. tried to disconnect while in the middle of trying to connect
   // 3. tried to initialize a connection without first waiting for a timeout or a disconnect
   console.log("error emitted", err);
+  tessel.led[1].high();
 });
 
 tryConnect();
 
-var camera = require('./lib/camera')(tessel.port.B),
+var camera = require('./lib/camera')(tessel.port.A),
   rfid = rfidlib.use(tessel.port.D),
   shutter = tessel.led[3], // Set up an LED to notify when we're taking a picture
   ready = tessel.led[0]; // Set up an LED to notify when we're uploading to Twitter
@@ -70,10 +81,11 @@ rfid.on('ready', function() {
 
   rfid.on('data', function(card) {
     
-    console.log('UID:', card.uid.readInt32LE(0));
+    console.log('UID, signed:', card.uid.readInt32LE(0));
+    console.log('UID, unsigned:', card.uid.readUInt32LE(0));
 
     if (!busy) {
-      drinkCoinHasher.hashDrinkCoinId(card.uid.readInt32LE(0), function(hashedId) {
+      hashDrinkCoinId(card.uid.readInt32LE(0), function(hashedId) {
         snapAndSend('dc' + hashedId, function() {
           busy = false;
         }, busy = true);
@@ -96,8 +108,9 @@ function snapAndSend(cardId, done) {
     .then(function(image) {
       shutter.low();
       // Save the image
-      console.log('Sending image to twitter');
-
+      console.log('Sending image to twitter', cardId);
+      //ready.toggle();
+      //done(null);
       send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
         if (err) ready.toggle(); // toggle twice
         ready.toggle();
