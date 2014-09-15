@@ -47,11 +47,15 @@ wifi.on('connect', function(err, data){
 wifi.on('disconnect', function(err, data){
   // wifi dropped, probably want to call connect() again
   console.log("disconnect emitted", err, data);
+  setTimeout(function() {
+      console.log('reconnecting wifi...');
+      connect();
+    }, 5000);
 })
 
 wifi.on('timeout', function(err){
   // tried to connect but couldn't, retry
-  console.log("timeout emitted"); 
+  console.log("wifi timeout emitted"); 
   connect();
 });
 
