@@ -152,16 +152,12 @@ function snapAndSend(cardId, done) {
           setTimeout(function() {
             //ready.toggle(); // remove when un-commenting below
             //done(); // remove when un-commenting below
-            send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image,
-              function(err){
-                if (err) ready.toggle(); // toggle twice
-                ready.toggle();
-                console.log('done.', err);
-                return done(err);
-              },
-              function (progress) {
-                console.log(progress);
-              });
+            send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
+              if (err) ready.toggle(); // toggle twice
+              ready.toggle();
+              console.log('done.', err);
+              return done(err);
+            });
           }, 3000);
           //process.sendfile('meow.jpg', image); // To save file locally - run tessel with -u ./
         });
