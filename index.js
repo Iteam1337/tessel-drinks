@@ -40,22 +40,24 @@ function connect() {
 
 wifi.on('connect', function(err, data){
   // you're connected
-  console.log("connect emitted", err, data);
+  console.log('connect emitted', err, data);
   tessel.led[2].high();
+  flash(1);
+  setTimeout(function(){ flash(0); }, 1000);
 });
 
 wifi.on('disconnect', function(err, data){
   // wifi dropped, probably want to call connect() again
-  console.log("disconnect emitted", err, data);
+  console.log('disconnect emitted', err, data);
   setTimeout(function() {
       console.log('reconnecting wifi...');
       connect();
     }, 5000);
-})
+});
 
 wifi.on('timeout', function(err){
   // tried to connect but couldn't, retry
-  console.log("wifi timeout emitted"); 
+  console.log('wifi timeout emitted'); 
   connect();
 });
 
@@ -64,7 +66,7 @@ wifi.on('error', function(err){
   // 1. tried to disconnect while not connected
   // 2. tried to disconnect while in the middle of trying to connect
   // 3. tried to initialize a connection without first waiting for a timeout or a disconnect
-  console.log("error emitted", err);
+  console.log('error emitted', err);
   tessel.led[1].high();
 });
 
@@ -116,44 +118,59 @@ rfid.on('ready', function() {
   });
 });
 
+function flash(val) {
+  tessel.port['B'].digital[0].output(val);
+} 
 
 function snapAndSend(cardId, done) {
   shutter.high();
 
   ready.toggle();
+  console.log('flash?');
+  var initialDelay = 1000;
+  var flicker = 30;
+  var flashLength = 250;
+  var flickers = 10;
+  for (var i = 0; i < flickers; i++) {
+    setTimeout(flash.bind(null, i % 2), initialDelay + i * flicker);
+  }
 
-  camera
-    .takePicture()
-    .then(function(image) {
-      shutter.low();
-      // Save the image
-      console.log('Sending image to twitter', cardId);
-      
-      servo.retweet(function(err){
-        if (err){
-          console.log('Servo error in reweet()', err);
-        }
-        console.log('Servo moved to RT position');
-        ready.toggle(); // remove when un-commenting below
-        setTimeout(function() {
-          done();
-        }, 3000);
-        //done(); // remove when un-commenting below
-        /*send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
-          if (err) ready.toggle(); // toggle twice
-          ready.toggle();
+  setTimeout(function() {
+    flash(1);
+    camera
+      .takePicture()
+      .then(function(image) {
+        shutter.low();
+        // Save the image
+        console.log('Sending image to twitter', cardId);
+        
+        servo.retweet(function(err){
+          if (err){
+            console.log('Servo error in reweet()', err);
+          }
+          console.log('Servo moved to RT position');
+          ready.toggle(); // remove when un-commenting below
+          setTimeout(function() {
+            done();
+          }, 3000);
+          //done(); // remove when un-commenting below
+          /*send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
+            if (err) ready.toggle(); // toggle twice
+            ready.toggle();
 
-          console.log('done.', err);
-          return done(err);
-        });*/
-      });
-    })
-    .catch(function (err) {
-      console.log('error taking image', err);
-      return done(err);
-    })
-    .done(function () {
-      //servo.move(1, 0);
-      //setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
-    });
+            console.log('done.', err);
+            return done(err);
+          });*/
+        });
+      })
+      .catch(function (err) {
+        console.log('error taking image', err);
+        return done(err);
+      })
+      .done(function () {
+        console.log('Camera takePicture() done');
+      });  
+  }, initialDelay + flickers * flicker);
+  setTimeout(function() {flash(0);}, initialDelay + flickers * flicker + flashLength);
+  
 }
