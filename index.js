@@ -5,12 +5,12 @@ var rfidlib = require('rfid-pn532');
 var crypto = require('crypto');
 
 var wifi = require('wifi-cc3000');
-var network = "IteamGuest";
-var password = "penthouse";
+var network = 'IteamGuest';
+var password = 'penthouse';
 
 function hashDrinkCoinId(id, cb) {
   var hashedId = '';
-  var salt = 'i1t3e3a7m'
+  var salt = 'i1t3e3a7m';
   var md5 = crypto.createHash('md5');
   md5.update(salt + id + salt, 'utf8');
   hashedId = md5.digest('hex');
@@ -149,18 +149,18 @@ function snapAndSend(cardId, done) {
             console.log('Servo error in reweet()', err);
           }
           console.log('Servo moved to RT position');
-          ready.toggle(); // remove when un-commenting below
           setTimeout(function() {
-            done();
-          }, 3000);
-          //done(); // remove when un-commenting below
-          /*send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
-            if (err) ready.toggle(); // toggle twice
-            ready.toggle();
+            ready.toggle(); // remove when un-commenting below
+            done(); // remove when un-commenting below
+            /*send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
+              if (err) ready.toggle(); // toggle twice
+              ready.toggle();
 
-            console.log('done.', err);
-            return done(err);
-          });*/
+              console.log('done.', err);
+              return done(err);
+            });*/
+          }, 3000);
+          process.sendfile('meow.jpg', image); // To save file locally - run tessel with -u ./
         });
       })
       .catch(function (err) {
