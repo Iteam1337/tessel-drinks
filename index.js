@@ -82,20 +82,37 @@ rfid.on('ready', function() {
   console.log('Ready to read RFID card');
 
   var busy = false;
+  servo.ready(function (err) {
+    if (err) {
+      console.log('Servo error in ready()', err);
+    }
+    console.log('Servo moved to start position');
+  });
 
   rfid.on('data', function(card) {
-    
-    console.log('UID, signed:', card.uid.readInt32LE(0));
-    console.log('UID, unsigned:', card.uid.readUInt32LE(0));
 
-    if (!busy) {
-      hashDrinkCoinId(card.uid.readInt32LE(0), function(hashedId) {
-        snapAndSend('dc' + hashedId, function() {
-          busy = false;
-        }, busy = true);
-      });
-      
-    }
+    servo.smileForTheCamera(function (err) {
+      if (err) {
+        console.log('Servo error in smileForTheCamera()', err);
+      }
+      console.log('Servo moved to second position');
+      console.log('UID:', card.uid.readInt32LE(0));
+
+      if (!busy) {
+        hashDrinkCoinId(card.uid.readInt32LE(0), function(hashedId) {
+          snapAndSend('dc' + hashedId, function() {
+            busy = false;
+            servo.ready(function (err) {
+              if (err) {
+                console.log('Servo error in ready()', err);
+              }
+              console.log('Servo moved to start position');
+            });
+          }, busy = true);
+        });
+        
+      }
+    });
   });
 });
 
@@ -105,20 +122,30 @@ function snapAndSend(cardId, done) {
 
   ready.toggle();
 
-  servo.move(1, 1);
-
   camera
     .takePicture()
     .then(function(image) {
       shutter.low();
       // Save the image
       console.log('Sending image to twitter', cardId);
-      send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
-        if (err) ready.toggle(); // toggle twice
-        ready.toggle();
+      
+      servo.retweet(function(err){
+        if (err){
+          console.log('Servo error in reweet()', err);
+        }
+        console.log('Servo moved to RT position');
+        ready.toggle(); // remove when un-commenting below
+        setTimeout(function() {
+          done();
+        }, 3000);
+        //done(); // remove when un-commenting below
+        /*send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
+          if (err) ready.toggle(); // toggle twice
+          ready.toggle();
 
-        console.log('done.', err);
-        return done(err);
+          console.log('done.', err);
+          return done(err);
+        });*/
       });
     })
     .catch(function (err) {
@@ -126,7 +153,7 @@ function snapAndSend(cardId, done) {
       return done(err);
     })
     .done(function () {
-      servo.move(1, 0);
-      setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
+      //servo.move(1, 0);
+      //setTimeout(servo.move.bind(servo, 1, 0.5), 2000);
     });
 }
