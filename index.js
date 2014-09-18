@@ -5,7 +5,7 @@ var rfidlib = require('rfid-pn532');
 var crypto = require('crypto');
 
 var wifi = require('wifi-cc3000');
-var network = 'Nordic.js';
+var network = 'Artipelag Guest';
 var password = 'penthouse';
 
 function hashDrinkCoinId(id, cb) {
