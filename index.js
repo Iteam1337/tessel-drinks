@@ -5,7 +5,7 @@ var rfidlib = require('rfid-pn532');
 var crypto = require('crypto');
 
 var wifi = require('wifi-cc3000');
-var network = 'IteamGuest';
+var network = 'Nordic.js';
 var password = 'penthouse';
 
 function hashDrinkCoinId(id, cb) {
@@ -31,9 +31,9 @@ function tryConnect() {
 
 function connect() {
   wifi.connect({
-    security: 'wpa2',
+    //security: 'wpa2',
     ssid: network,
-    password: password,
+    //password: password,
     timeout: 30
   });
 }
@@ -70,7 +70,7 @@ wifi.on('error', function(err){
   tessel.led[1].high();
 });
 
-tryConnect();
+// tryConnect();
 
 var camera = require('./lib/camera')(tessel.port.A),
   rfid = rfidlib.use(tessel.port.D),
@@ -152,7 +152,7 @@ function snapAndSend(cardId, done) {
           setTimeout(function() {
             //ready.toggle(); // remove when un-commenting below
             //done(); // remove when un-commenting below
-            send('A #drinkcoin was issued by @iteam1337 to #' + cardId, image, function(err){
+            send('A #drinkcoin was issued by @iteam1337 to #' + cardId + ' at #nordicjs', image, function(err){
               if (err) ready.toggle(); // toggle twice
               ready.toggle();
               console.log('done.', err);
