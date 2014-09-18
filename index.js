@@ -34,7 +34,7 @@ function connect() {
     //security: 'wpa2',
     ssid: network,
     //password: password,
-    timeout: 30
+    timeout: 90
   });
 }
 
